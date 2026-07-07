@@ -1,0 +1,16 @@
+Source: lookout-canboat
+Section: net
+Priority: optional
+Maintainer: LOOKOUT OTA Team <ota@lookout-ai.local>
+Build-Depends: debhelper-compat (= 13), make, gcc
+Standards-Version: 4.6.2
+Rules-Requires-Root: no
+Homepage: https://github.com/LOOKOUT-AI/canboat
+
+Package: lookout-canboat
+Architecture: arm64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Provides: canboat
+Description: LOOKOUT-packaged CANboat NMEA 2000 tools
+ Installs the CANboat command-line tools used by LOOKOUT devices, including
+ analyzer and actisense-serial, using the LOOKOUT fork.

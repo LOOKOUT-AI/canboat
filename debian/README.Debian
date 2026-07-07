@@ -1,0 +1,4 @@
+lookout-canboat for LOOKOUT devices
+
+This package builds the LOOKOUT fork of CANboat and installs its command-line
+tools through the upstream Makefile install target.

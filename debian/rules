@@ -1,0 +1,23 @@
+#!/usr/bin/make -f
+
+include /usr/share/dpkg/architecture.mk
+
+ifneq ($(DEB_BUILD_ARCH),$(DEB_HOST_ARCH))
+export CC=$(DEB_HOST_GNU_TYPE)-gcc
+export PLATFORM=linux-$(DEB_HOST_ARCH)
+endif
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	$(MAKE)
+
+override_dh_auto_test:
+	$(MAKE) tests
+
+override_dh_auto_install:
+	$(MAKE) install DESTDIR=$(CURDIR)/debian/lookout-canboat PREFIX=/usr SYSCONFDIR=/etc
+
+override_dh_shlibdeps:
+	dh_shlibdeps -- -l/usr/$(DEB_HOST_GNU_TYPE)/lib

@@ -1,0 +1,5 @@
+lookout-canboat (7.1.0) unstable; urgency=medium
+
+  * Add LOOKOUT Debian packaging for CANboat tools.
+
+ -- LOOKOUT OTA Team <ota@lookout-ai.local>  Tue, 07 Jul 2026 12:00:00 -0400
