@@ -1,4 +1,4 @@
-lookout-canboat (7.1.0) unstable; urgency=medium
+lookout-canboat (3.5.1) unstable; urgency=medium
 
   * Add LOOKOUT Debian packaging for CANboat tools.
 
