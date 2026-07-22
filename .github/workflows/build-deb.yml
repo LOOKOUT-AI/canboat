@@ -17,6 +17,16 @@ on:
         required: false
         default: ''
         type: string
+      gcp_workload_identity_provider:
+        description: GCP Workload Identity Provider to use when upload_to_gcs is true
+        required: false
+        default: ''
+        type: string
+      gcp_service_account:
+        description: GCP service account to use when upload_to_gcs is true
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: read
@@ -60,10 +70,22 @@ jobs:
 
       - name: Validate GCS artifact input
         if: ${{ inputs.upload_to_gcs }}
+        env:
+          GCS_ARTIFACT_URI: ${{ inputs.gcs_artifact_uri }}
+          GCP_WORKLOAD_IDENTITY_PROVIDER_INPUT: ${{ inputs.gcp_workload_identity_provider }}
+          GCP_SERVICE_ACCOUNT_INPUT: ${{ inputs.gcp_service_account }}
         run: |
           set -euo pipefail
-          if [ -z "${{ inputs.gcs_artifact_uri }}" ]; then
+          if [ -z "${GCS_ARTIFACT_URI}" ]; then
             echo "upload_to_gcs=true requires gcs_artifact_uri." >&2
+            exit 1
+          fi
+          if [ -z "${GCP_WORKLOAD_IDENTITY_PROVIDER_INPUT}" ]; then
+            echo "upload_to_gcs=true requires gcp_workload_identity_provider." >&2
+            exit 1
+          fi
+          if [ -z "${GCP_SERVICE_ACCOUNT_INPUT}" ]; then
+            echo "upload_to_gcs=true requires gcp_service_account." >&2
             exit 1
           fi
 
@@ -71,8 +93,8 @@ jobs:
         if: ${{ inputs.upload_to_gcs }}
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          workload_identity_provider: ${{ inputs.gcp_workload_identity_provider }}
+          service_account: ${{ inputs.gcp_service_account }}
 
       - name: Set up Cloud SDK
         if: ${{ inputs.upload_to_gcs }}
