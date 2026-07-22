@@ -6,9 +6,21 @@ on:
       - master
       - main
   workflow_dispatch:
+    inputs:
+      upload_to_gcs:
+        description: Upload collected package artifacts to the supplied GCS URI
+        required: false
+        default: false
+        type: boolean
+      gcs_artifact_uri:
+        description: GCS URI for collected package artifacts, for example gs://bucket/path/repo
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   build-deb:
@@ -46,10 +58,37 @@ jobs:
           find .. -maxdepth 1 -name "${PACKAGE_NAME}_*.changes" -exec cp -v {} artifacts/ \;
           find .. -maxdepth 1 -name "${PACKAGE_NAME}_*.buildinfo" -exec cp -v {} artifacts/ \;
 
+      - name: Validate GCS artifact input
+        if: ${{ inputs.upload_to_gcs }}
+        run: |
+          set -euo pipefail
+          if [ -z "${{ inputs.gcs_artifact_uri }}" ]; then
+            echo "upload_to_gcs=true requires gcs_artifact_uri." >&2
+            exit 1
+          fi
+
+      - name: Set up gcloud auth
+        if: ${{ inputs.upload_to_gcs }}
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        if: ${{ inputs.upload_to_gcs }}
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Upload build artifacts to GCS
+        if: ${{ inputs.upload_to_gcs }}
+        run: |
+          set -euo pipefail
+          gsutil -m cp artifacts/* "${{ inputs.gcs_artifact_uri }}/"
+
       - name: Upload build artifacts
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PACKAGE_NAME }}
           path: artifacts/
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 1
